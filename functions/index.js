@@ -9,7 +9,7 @@ const app = express();
 app.get('/defaultSurveyQuests/',(req, res)=>{
   admin
     .firestore()
-    .collection('Clients')
+    .collection('DefaultSurveys')
     .get()
     .then(data => {
       let defaultQuestions = [];
@@ -22,18 +22,38 @@ app.get('/defaultSurveyQuests/',(req, res)=>{
 
 })
 
-app.post('/addcustomQuest',(req, res)=>{
+app.get('/ClientQuestionnaire/:client',(req, res)=>{
+  admin
+    .firestore()
+    .collection('Clients')
+    .doc(req.params.client)
+    .collection('SurveySettings')
+    .get()
+    .then(data => {
+      let defaultQuestions = [];
+      data.forEach(doc => {
+        defaultQuestions.push(doc.data());
+      });
+      return res.json(defaultQuestions);
+    })
+    .catch(err => console.error(err));
+
+})
+
+
+app.post('/addcustomQuest/:compName/:id',(req, res)=>{
   const customQuest = {
-    id: req.body.id,
+    id: req.params.id,
     quest: req.body.quest,
   };
   console.log()
   admin
     .firestore()
     .collection('Clients')
-    .doc('SWAY')
+    .doc(req.params.compName)
     .collection('CustomQuests')
-    .add(customQuest)
+    .doc(customQuest.id)
+    .set(customQuest)
     .then(doc => {
       res.json({message: `custom quest added successfully: ${doc.quest}`});
     })
@@ -67,7 +87,7 @@ app.put('/createClient/',(req, res)=>{
     })
 })
 
-app.post('/addStakeholder',(req, res)=>{
+app.post('/addStakeholder/:cn',(req, res)=>{
   const Stakeholder = {
     name: req.body.name,
     email: req.body.email,
@@ -77,7 +97,7 @@ app.post('/addStakeholder',(req, res)=>{
   admin
     .firestore()
     .collection('Clients')
-    .doc('Softway')
+    .doc(req.params.cn)
     .collection('Stakeholders')
     .doc(Stakeholder.email)
     .set(Stakeholder)
@@ -89,5 +109,71 @@ app.post('/addStakeholder',(req, res)=>{
       console.error(err);
     })
 })
+
+app.post('/addQuestionnaire/:compName',(req, res)=>{
+  const Quests = {
+    
+    industryType : req.body.industryType,
+    baselineDate : req.body.baselineDate,
+    pulseFreq : req.body.pulseFreq,
+    
+    trustLeader : req.body.trustLeader,
+    trustTeam : req.body.trustTeam,
+    trustSelf : req.body.trustSelf,
+
+    inclusionLeader : req.body.inclusionLeader,
+    inclusionTeam : req.body.inclusionTeam,
+    inclusionSelf : req.body.inclusionSelf,
+
+    empathyLeader : req.body.empathyLeader,
+    empathyTeam : req.body.empathyTeam,
+    empathySelf : req.body.empathySelf,
+
+    empLeader : req.body.empLeader,
+    empTeam : req.body.empTeam,
+    empSelf : req.body.empSelf,
+
+    forgiveLeader : req.body.forgiveLeader,
+    forgiveTeam : req.body.forgiveTeam,
+    forgiveSelf : req.body.forgiveSelf,
+
+    vulLeader : req.body.vulLeader,
+    vulTeam : req.body.vulTeam,
+    vulSelf : req.body.vulSelf,
+
+    mindsetLeader : req.body.mindsetLeader,
+    mindsetTeam : req.body.mindsetTeam,
+    mindsetSelf : req.body.mindsetSelf,
+
+    behLeader : req.body.behLeader,
+    behTeam : req.body.behTeam,
+    behSelf : req.body.behSelf,
+
+    commLeader : req.body.commLeader,
+    commTeam : req.body.commTeam,
+    commSelf : req.body.commSelf,
+
+    hptLeader : req.body.hptLeader,
+    hptTeam : req.body.hptTeam,
+    hptSelf : req.body.hptSelf,
+            
+  };
+
+  admin
+    .firestore()
+    .collection('Clients')
+    .doc(req.params.compName)
+    .collection('SurveySettings')
+    .doc('SwaySS')
+    .set(Quests)
+    .then(doc => {
+      res.json({message: `custom quest added successfully: ${doc.quest}`});
+    })
+    .catch(err => {
+      res.status(500).json({ error: 'Something went wrong'});
+      console.error(err);
+    })
+})
+
 
 exports.api = functions.https.onRequest(app);
