@@ -5,7 +5,16 @@ admin.initializeApp();
 
 const express = require('express');
 const app = express();
+var cors = require('cors')
+app.use(cors({credentials: true, origin: true}))
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
+//To fetch default survey question for generic mnc or healthcare
 app.get('/defaultSurveyQuests/',(req, res)=>{
   admin
     .firestore()
@@ -22,6 +31,7 @@ app.get('/defaultSurveyQuests/',(req, res)=>{
 
 })
 
+//To fetch client specific questions 
 app.get('/ClientQuestionnaire/:client',(req, res)=>{
   admin
     .firestore()
@@ -40,7 +50,7 @@ app.get('/ClientQuestionnaire/:client',(req, res)=>{
 
 })
 
-
+//To add custom questions for a client
 app.post('/addcustomQuest/:compName/:id',(req, res)=>{
   const customQuest = {
     id: req.params.id,
@@ -63,21 +73,23 @@ app.post('/addcustomQuest/:compName/:id',(req, res)=>{
     })
 })
 
+//to add a new client with basic info
 app.put('/createClient/',(req, res)=>{
   const newComp = {
     companyName: req.body.companyName,
     brief: req.body.brief,
-    headquarters: req.body.headquarters,
-    empsize: req.body.empsize,
+    headquarters: req.body.headQuarters,
+    empsize: req.body.empSize,
     revenue: req.body.revenue,
     industryType: req.body.industryType
   };
-  console.log()
+  
+  console.log("gjgjggkhkh")
   admin
     .firestore()
     .collection('Clients')
     .doc(newComp.companyName)
-    .add(newComp)
+    .set(newComp)
     .then(doc => {
       res.json({message: `New added successfully: ${newComp.companyName}`});
     })
@@ -87,6 +99,7 @@ app.put('/createClient/',(req, res)=>{
     })
 })
 
+//To add stakeholder for a specific client 
 app.post('/addStakeholder/:cn',(req, res)=>{
   const Stakeholder = {
     name: req.body.name,
@@ -102,7 +115,7 @@ app.post('/addStakeholder/:cn',(req, res)=>{
     .doc(Stakeholder.email)
     .set(Stakeholder)
     .then(doc => {
-      res.json({message: `custom quest added successfully: ${doc.quest}`});
+      res.json({message: `custom quest added successfully: ${doc.name}`});
     })
     .catch(err => {
       res.status(500).json({ error: 'Something went wrong'});
@@ -110,6 +123,9 @@ app.post('/addStakeholder/:cn',(req, res)=>{
     })
 })
 
+
+
+//To add questionnaire for a specific client 
 app.post('/addQuestionnaire/:compName',(req, res)=>{
   const Quests = {
     
@@ -167,7 +183,7 @@ app.post('/addQuestionnaire/:compName',(req, res)=>{
     .doc('SwaySS')
     .set(Quests)
     .then(doc => {
-      res.json({message: `custom quest added successfully: ${doc.quest}`});
+      res.json({message: `Survey questions added successfully: ${doc.quest}`});
     })
     .catch(err => {
       res.status(500).json({ error: 'Something went wrong'});
