@@ -161,9 +161,9 @@ app.post('/addQuestionnaire/:compName',(req, res)=>{
     mindsetTeam : req.body.mindsetTeam,
     mindsetSelf : req.body.mindsetSelf,
 
-    behLeader : req.body.behLeader,
-    behTeam : req.body.behTeam,
-    behSelf : req.body.behSelf,
+    attitudeLeader : req.body.attitudeLeader,
+    attitudeTeam : req.body.attitudeTeam,
+    attitudeSelf : req.body.attitudeSelf,
 
     commLeader : req.body.commLeader,
     commTeam : req.body.commTeam,
@@ -183,7 +183,7 @@ app.post('/addQuestionnaire/:compName',(req, res)=>{
     .doc('SwaySS')
     .set(Quests)
     .then(doc => {
-      res.json({message: `Survey questions added successfully: ${doc.quest}`});
+      res.json({message: `Survey questions added successfully: ${req.params.compName}`});
     })
     .catch(err => {
       res.status(500).json({ error: 'Something went wrong'});
